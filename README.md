@@ -1,2 +1,2 @@
-# node-api-json
-Node.js JSON API 
+# node-json-api-server
+Node.js JSON API Server 
