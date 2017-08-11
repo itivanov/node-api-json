@@ -7,5 +7,7 @@ api.start(8000);
 api.handle('ping', ping);
 
 function ping(data) {
-    return data;
+    var out = {response: api.status.OK};
+
+    return out;
 }

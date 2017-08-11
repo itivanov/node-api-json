@@ -1,6 +1,7 @@
 'use strict';
 
 const status = {
+    OK: 200,
     BadRequest: 400,
     NotFound: 404,
     NotAcceptable: 406,
@@ -9,7 +10,7 @@ const status = {
     GatewayTimeout: 504,
 };
 
-const code = {
+const error = {
     RequestError: 1,
     ResponseTimeout: 2,
     JsonError: 3,
@@ -19,28 +20,31 @@ const code = {
 };
 
 module.exports = {
+    OK: {
+        status: status.OK
+    },
     RequestError: {
         status: status.BadRequest,
-        error: code.RequestError
+        error: error.RequestError
     },
     ResponseTimeout: {
         status: status.GatewayTimeout,
-        error: code
+        error: error.ResponseTimeout
     },
     JsonError: {
         status: status.UnprocessableEntity,
-        error: code.JsonError
+        error: error.JsonError
     },
     InvalidAction: {
         status: status.NotAcceptable,
-        error: code.InvalidAction
+        error: error.InvalidAction
     },
     MissingAction: {
         status: status.NotFound,
-        error: code.MissingAction
+        error: error.MissingAction
     },
     ServerError: {
         status: status.InternalServerError,
-        error: code.ServerError
+        error: error.ServerError
     },
 };

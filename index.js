@@ -2,9 +2,9 @@
 
 const http = require('http');
 const url = require('url');
-const error = require('./errors');
 
 const self = module.exports = {
+    status: require('./status'),
     handlers: [],
 
     start: function(port) {
@@ -26,7 +26,7 @@ const self = module.exports = {
 
             request.on('error', function(error) {
                 console.log('[REQUEST] [ERR] ' + error);
-                self.responseError(response, error.RequestError);
+                self.responseError(response, self.status.RequestError);
             });
 
             response.on('error', function(error) {
@@ -35,7 +35,7 @@ const self = module.exports = {
 
             response.on('timeout', function() {
                 console.log('[RESPONSE] [TIMEOUT]');
-                self.responseError(response, error.ResponseTimeout);
+                self.responseError(response, self.status.ResponseTimeout);
             });
         });
 
@@ -72,15 +72,15 @@ const self = module.exports = {
         try {
             body = JSON.parse(body);
         } catch (e) {
-            return self.responseError(response, error.JsonError);
+            return self.responseError(response, self.status.JsonError);
         }
 
         if (!body.hasOwnProperty('method')) {
-            return self.responseError(response, error.InvalidAction);
+            return self.responseError(response, self.status.InvalidAction);
         }
 
         if (!(body.method in self.handlers)) {
-            return self.responseError(response, error.MissingAction);
+            return self.responseError(response, self.status.MissingAction);
         }
 
         var data = {};
@@ -94,7 +94,7 @@ const self = module.exports = {
 
             return self.handleResponse(response, out);
         } catch (e) {
-            return self.responseError(response, error.ServerError);
+            return self.responseError(response, self.status.ServerError);
         }
     },
 
