@@ -7,7 +7,7 @@ const status = {
     NotAcceptable: 406,
     UnprocessableEntity: 422,
     InternalServerError: 500,
-    GatewayTimeout: 504,
+    GatewayTimeout: 504
 };
 
 const error = {
@@ -16,7 +16,7 @@ const error = {
     JsonError: 3,
     InvalidAction: 4,
     MissingAction: 5,
-    ServerError: 6,
+    ServerError: 6
 };
 
 module.exports = {
@@ -46,5 +46,5 @@ module.exports = {
     ServerError: {
         status: status.InternalServerError,
         error: error.ServerError
-    },
+    }
 };
