@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const api = require('../index');
 
