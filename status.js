@@ -3,6 +3,7 @@
 const status = {
     OK: 200,
     BadRequest: 400,
+    Unauthorized: 401,
     NotFound: 404,
     NotAcceptable: 406,
     UnprocessableEntity: 422,
@@ -16,7 +17,8 @@ const error = {
     JsonError: 3,
     InvalidAction: 4,
     MissingAction: 5,
-    ServerError: 6
+    ServerError: 6,
+    InvalidSecret: 7
 };
 
 module.exports = {
@@ -46,5 +48,9 @@ module.exports = {
     ServerError: {
         status: status.InternalServerError,
         error: error.ServerError
+    },
+    InvalidSecret: {
+        status: status.Unauthorized,
+        error: error.InvalidSecret
     }
 };

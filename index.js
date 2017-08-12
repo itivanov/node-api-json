@@ -74,8 +74,12 @@ const self = module.exports = {
             return self.responseError(response, self.status.JsonError);
         }
 
-        if (!body.hasOwnProperty('method')) {
+        if (!body.hasOwnProperty('method') || body.method.trim() === '') {
             return self.responseError(response, self.status.InvalidAction);
+        }
+
+        if (!body.hasOwnProperty('secret') || body.secret.trim() === '') {
+            return self.responseError(response, self.status.InvalidSecret);
         }
 
         if (!(body.method in self.handlers)) {
@@ -104,6 +108,8 @@ const self = module.exports = {
     },
 
     responseError: function (response, error) {
+        console.log('[RESPONSE] [ERROR] ' + JSON.stringify(error));
+
         self.handleResponse(response, {
             'response': error
         });
