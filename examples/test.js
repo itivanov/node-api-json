@@ -2,7 +2,12 @@
 
 const api = require('../index');
 
-api.start(8000);
+const config = {
+    port: 8000,
+    timeout: 10000
+};
+
+api.start(config);
 
 api.handle('ping', ping);
 

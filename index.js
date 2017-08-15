@@ -6,66 +6,71 @@ const self = module.exports = {
     status: require('./status'),
     handlers: [],
 
-    start: function (port) {
+    start: function(options) {
+        if (!options.hasOwnProperty('port')) {
+            console.log('[SERVER] [ERR] Server port is not defined');
+            return self.shutdown();
+        }
+
         var server = http.createServer();
 
-        server.setTimeout(10000);
+        if (options.hasOwnProperty('timeout')) {
+            server.setTimeout(options.timeout);
+        }
 
-        server.on('request', function (request, response) {
+        server.on('request', function(request, response) {
             var body = [];
 
-            request.on('data', function (chunk) {
+            request.on('data', function(chunk) {
                 body.push(chunk);
             });
 
-            request.on('end', function () {
+            request.on('end', function() {
                 body = Buffer.concat(body).toString();
                 self.handleRequest(request, response, body);
             });
 
-            request.on('error', function (error) {
+            request.on('error', function(error) {
                 console.log('[REQUEST] [ERR] ' + error);
                 self.responseError(response, self.status.RequestError);
             });
 
-            response.on('error', function (error) {
+            response.on('error', function(error) {
                 console.log('[RESPONSE] [ERR] ' + error);
             });
 
-            response.on('timeout', function () {
+            response.on('timeout', function() {
                 console.log('[RESPONSE] [TIMEOUT]');
                 self.responseError(response, self.status.ResponseTimeout);
             });
         });
 
-        server.on('listening', function () {
-            console.log('[SERVER] [READY]');
+        server.on('listening', function() {
+            console.log('[SERVER] [READY] port: ' + options.port);
         });
 
-        server.on('error', function (error) {
+        server.on('error', function(error) {
             console.log('[SERVER] [ERR] ' + error);
 
             if (error.code === 'EADDRINUSE') {
                 server.close();
             } else {
-                setTimeout(function () {
-                    process.exit(1);
-                }, 1000);
+                return self.shutdown();
             }
         });
 
-        server.on('close', function () {
-            console.log('[SERVER] [CLOSE]');
+        server.on('close', function() {
+            console.log('[SERVER] [CLOSE] restarting...');
 
-            setTimeout(function () {
-                server.listen(port);
+            setTimeout(function() {
+                server.listen(options.port);
             }, 1000);
         });
 
-        server.listen(port);
+        server.listen(options.port);
     },
 
-    handleRequest: function (request, response, body) {
+    handleRequest: function(request, response, body) {
         console.log('[REQUEST] [DATA] ' + body);
 
         try {
@@ -81,6 +86,8 @@ const self = module.exports = {
         if (!body.hasOwnProperty('secret') || body.secret.trim() === '') {
             return self.responseError(response, self.status.InvalidSecret);
         }
+
+        /* TODO: check valid token */
 
         if (!(body.method in self.handlers)) {
             return self.responseError(response, self.status.MissingAction);
@@ -101,13 +108,13 @@ const self = module.exports = {
         }
     },
 
-    handleResponse: function (response, out) {
+    handleResponse: function(response, out) {
         response.setHeader('Content-Type', 'application/json');
         response.write(JSON.stringify(out));
         response.end();
     },
 
-    responseError: function (response, error) {
+    responseError: function(response, error) {
         console.log('[RESPONSE] [ERROR] ' + JSON.stringify(error));
 
         self.handleResponse(response, {
@@ -115,7 +122,13 @@ const self = module.exports = {
         });
     },
 
-    handle: function (route, handler) {
+    handle: function(route, handler) {
         self.handlers[route] = handler;
+    },
+
+    shutdown: function() {
+        setTimeout(function() {
+            process.exit(1);
+        }, 1000);
     }
 };
