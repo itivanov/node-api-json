@@ -8,7 +8,7 @@ const self = module.exports = {
 
     start: function(options) {
         if (!options.hasOwnProperty('port')) {
-            console.log(self.stamp() + ' [SERVER] [ERR] Server port is not defined');
+            console.log('[SERVER] [ERR] Server port is not defined');
             return self.shutdown();
         }
 
@@ -31,26 +31,26 @@ const self = module.exports = {
             });
 
             request.on('error', function(error) {
-                console.log(self.stamp() + ' [REQUEST] [ERR] ' + error);
+                console.log('[REQUEST] [ERR] ' + error);
                 self.responseError(response, self.status.RequestError);
             });
 
             response.on('error', function(error) {
-                console.log(self.stamp() + ' [RESPONSE] [ERR] ' + error);
+                console.log('[RESPONSE] [ERR] ' + error);
             });
 
             response.on('timeout', function() {
-                console.log(self.stamp() + ' [RESPONSE] [TIMEOUT]');
+                console.log('[RESPONSE] [TIMEOUT]');
                 self.responseError(response, self.status.ResponseTimeout);
             });
         });
 
         server.on('listening', function() {
-            console.log(self.stamp() + ' [SERVER] [READY] port: ' + options.port);
+            console.log('[SERVER] [READY] port: ' + options.port);
         });
 
         server.on('error', function(error) {
-            console.log(self.stamp() + ' [SERVER] [ERR] ' + error);
+            console.log('[SERVER] [ERR] ' + error);
 
             if (error.code === 'EADDRINUSE') {
                 server.close();
@@ -60,7 +60,7 @@ const self = module.exports = {
         });
 
         server.on('close', function() {
-            console.log(self.stamp() + ' [SERVER] [CLOSE] restarting...');
+            console.log('[SERVER] [CLOSE] restarting...');
 
             setTimeout(function() {
                 server.listen(options.port);
@@ -71,7 +71,7 @@ const self = module.exports = {
     },
 
     handleRequest: function(request, response, body) {
-        console.log(self.stamp() + ' [REQUEST] [OK] ' + body);
+        console.log('[REQUEST] [OK] ' + body);
 
         try {
             body = JSON.parse(body);
@@ -111,7 +111,7 @@ const self = module.exports = {
     },
 
     handleResponse: function(response, out) {
-        console.log(self.stamp() + ' [RESPONSE] [OK] ' + JSON.stringify(out));
+        console.log('[RESPONSE] [OK] ' + JSON.stringify(out));
 
         response.setHeader('Content-Type', 'application/json');
         response.write(JSON.stringify(out));
@@ -119,7 +119,7 @@ const self = module.exports = {
     },
 
     responseError: function(response, error) {
-        console.log(self.stamp() + ' [RESPONSE] [ERROR] ' + JSON.stringify(error));
+        console.log('[RESPONSE] [ERROR] ' + JSON.stringify(error));
 
         self.handleResponse(response, {
             'response': error
@@ -139,9 +139,5 @@ const self = module.exports = {
         setTimeout(function() {
             process.exit(1);
         }, 1000);
-    },
-
-    stamp: function() {
-        return new Date().toISOString();
     }
 };
