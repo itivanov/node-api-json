@@ -1,14 +1,16 @@
 'use strict';
 
 const http = require('http');
+const uuid = require('uuid/v4');
 
 const self = module.exports = {
     status: require('./status'),
+    tid: null,
     handlers: [],
 
     start: function(options) {
         if (!options.hasOwnProperty('port')) {
-            console.log('[SERVER] [ERR] Server port is not defined');
+            console.log(self.tid + ' [SERVER] [ERR] Server port is not defined');
             return self.shutdown();
         }
 
@@ -20,6 +22,7 @@ const self = module.exports = {
 
         server.on('request', function(request, response) {
             var body = [];
+            self.tid = uuid();
 
             request.on('data', function(chunk) {
                 body.push(chunk);
@@ -31,26 +34,26 @@ const self = module.exports = {
             });
 
             request.on('error', function(error) {
-                console.log('[REQUEST] [ERR] ' + error);
+                console.log(self.tid + ' [REQUEST] [ERR] ' + error);
                 self.responseError(response, self.status.RequestError);
             });
 
             response.on('error', function(error) {
-                console.log('[RESPONSE] [ERR] ' + error);
+                console.log(self.tid + ' [RESPONSE] [ERR] ' + error);
             });
 
             response.on('timeout', function() {
-                console.log('[RESPONSE] [TIMEOUT]');
+                console.log(self.tid + ' [RESPONSE] [TIMEOUT]');
                 self.responseError(response, self.status.ResponseTimeout);
             });
         });
 
         server.on('listening', function() {
-            console.log('[SERVER] [READY] port: ' + options.port);
+            console.log(self.tid + ' [SERVER] [READY] port: ' + options.port);
         });
 
         server.on('error', function(error) {
-            console.log('[SERVER] [ERR] ' + error);
+            console.log(self.tid + ' [SERVER] [ERR] ' + error);
 
             if (error.code === 'EADDRINUSE') {
                 server.close();
@@ -59,8 +62,12 @@ const self = module.exports = {
             }
         });
 
+        server.on('clientError', (error, socket) => {
+            console.log(self.tid + ' [SERVER] [ERR] ' + error);
+        });
+
         server.on('close', function() {
-            console.log('[SERVER] [CLOSE] restarting...');
+            console.log(self.tid + ' [SERVER] [CLOSE] restarting...');
 
             setTimeout(function() {
                 server.listen(options.port);
@@ -71,7 +78,7 @@ const self = module.exports = {
     },
 
     handleRequest: function(request, response, body) {
-        console.log('[REQUEST] [OK] ' + body);
+        console.log(self.tid + ' [REQUEST] [OK] ' + body);
 
         try {
             body = JSON.parse(body);
@@ -111,7 +118,7 @@ const self = module.exports = {
     },
 
     handleResponse: function(response, out) {
-        console.log('[RESPONSE] [OK] ' + JSON.stringify(out));
+        console.log(self.tid + ' [RESPONSE] [OK] ' + JSON.stringify(out));
 
         response.setHeader('Content-Type', 'application/json');
         response.write(JSON.stringify(out));
@@ -119,7 +126,7 @@ const self = module.exports = {
     },
 
     responseError: function(response, error) {
-        console.log('[RESPONSE] [ERROR] ' + JSON.stringify(error));
+        console.log(self.tid + ' [RESPONSE] [ERROR] ' + JSON.stringify(error));
 
         self.handleResponse(response, {
             'response': error
